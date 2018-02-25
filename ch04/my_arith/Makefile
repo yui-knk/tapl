@@ -1,5 +1,5 @@
 
-OBJS = support.cmo syntax.cmo parser.cmo lexer.cmo main.cmo
+OBJS = support.cmo syntax.cmo core.cmo parser.cmo lexer.cmo main.cmo
 
 all: $(OBJS) f
 

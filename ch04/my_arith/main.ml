@@ -1,4 +1,5 @@
 open Support.Error
+open Core
 
 let argDefs = []
 
@@ -32,7 +33,8 @@ let process_file infile =
 
 let main () =
   let infile = parseArgs() in
-  let _ = process_file infile in
+  let result = process_file infile in
+  let _ = Syntax.printtm(eval result) in
   ()
 
 let _ = main()
