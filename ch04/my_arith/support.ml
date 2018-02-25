@@ -8,6 +8,6 @@ let errf f =
   raise (Exit 1)
 
 let err s =
-  errf (fun () -> printf "Error: %s.\n" s)
+  errf (fun() -> printf "Error: %s.\n" s)
 
 end

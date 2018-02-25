@@ -20,7 +20,12 @@ let openfile infile =
 
 let parseFile infile =
   let pi = openfile infile in
-  pi
+  let lexbuf = Lexer.create infile pi in
+  let result =
+    try Parser.toplevel Lexer.main lexbuf with Parsing.Parse_error ->
+    err "Parse error" in
+    (* error (Lexer.info lexbuf) "Parse error" in *)
+  Parsing.clear_parser(); close_in pi; result
 
 let process_file infile =
   parseFile infile
