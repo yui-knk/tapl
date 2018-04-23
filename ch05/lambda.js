@@ -44,6 +44,7 @@ prd = m => { return fst(m(ss)(zz)) };
 minus = m => n => { return n(prd)(m) };
 
 // Practice 5.2.6
+// ssの呼び出し回数に比例するのでおおよそnステップ.
 
 
 // Practice 5.2.7
