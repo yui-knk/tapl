@@ -25,6 +25,7 @@ scc2  = n => s => z => { return n(s)(s(z)) };
 
 plus  = m => n => s => z => { return m(s)(n(s)(z)) };
 times = m => n => { return m(plus(n))(c0) };
+times3 = m => n => { return m() };
 
 // Practice 5.2.3
 times2 = m => n => s => z => { return m(n(s))(z) };
