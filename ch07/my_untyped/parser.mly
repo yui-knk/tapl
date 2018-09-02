@@ -25,6 +25,12 @@ open Syntax
 %token <Support.Error.info> LAMBDA
 
 /* Identifier and constant value tokens */
+
+/*
+  withinfo has one type variable ('a),
+  so "string Support.Error.withinfo" means
+  "{i: info; v: string}"
+*/
 %token <string Support.Error.withinfo> UCID  /* uppercase-initial */
 %token <string Support.Error.withinfo> LCID  /* lowercase/symbolic-initial */
 %token <int Support.Error.withinfo> INTV
