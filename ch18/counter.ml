@@ -3,14 +3,15 @@ type counter = {
   inc: unit -> unit;
 };;
 
-let c = 
-  let x = ref 1 in
+let newCounter =
+  fun u -> let x = ref 1 in
     {
       get = (fun u -> !x);
       inc = (fun u -> x := !x + 1);
     };;
 
-c.inc ();;
-c.inc ();;
+let c = newCounter ();;
 
+c.inc ();;
+c.inc ();;
 print_int (c.get ());;
