@@ -102,9 +102,23 @@ newSetCounter =
   lambda _: Unit. let r = {x = ref 1} in
     setCounterClass r;
 
-/* 18.9 */
-sc = newSetCounter unit;
-sc.inc unit;
-sc.inc unit;
+setCounterClass2 =
+  lambda r: CounterRep.
+    lambda self: SetCounter.
+      {
+        get = lambda _: Unit. !(r.x),
+        set = lambda i: Nat. r.x := i,
+        inc = lambda _: Unit. self.set (succ (self.get unit))
+      };
+
+newSetCounter2 =
+  lambda _: Unit.
+    let r = {x = ref 1} in
+      fix (setCounterClass2 r);
+
+/* 18.10 */
+sc2 = newSetCounter2 unit;
+sc2.inc unit;
+sc2.inc unit;
 /* 3 */
-sc.get unit;
+sc2.get unit;
