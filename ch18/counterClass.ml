@@ -70,15 +70,28 @@ newbackupCounter2 =
   lambda _: Unit. let r = {x = ref 1, b = ref 1, b2 = ref 1} in
     backupCounter2Class r;
 
+funnyBackupCounterClass =
+  lambda r: BackupCounterRep.
+    let super = backupCounterClass r in
+      {
+        get = super.get,
+        inc = lambda _: Unit. (super.backup unit; super.inc unit),
+        reset = super.reset,
+        backup = super.backup
+      };
+
+newFunnyBackupCounter =
+  lambda _: Unit. let r = {x = ref 1, b = ref 1} in
+    funnyBackupCounterClass r;
+
 /* 18.7.1 */
-bc2 = newbackupCounter2 unit;
-bc2.inc unit;
+fb = newFunnyBackupCounter unit;
+/* b = 1 */
+fb.inc unit;
 /* b = 2 */
-bc2.backup unit;
-bc2.inc unit;
-/* b2 = 3 */
-bc2.backup2 unit;
-bc2.reset unit;
-bc2.get unit;
-bc2.reset2 unit;
-bc2.get unit;
+fb.inc unit;
+/* b = 3 */
+fb.inc unit;
+fb.get unit;
+fb.reset unit;
+fb.get unit;
