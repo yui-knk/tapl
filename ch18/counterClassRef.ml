@@ -11,7 +11,7 @@ InstrCounter = {
 
 setCounterClass =
   lambda r: CounterRep.
-    lambda self: Ref SetCounter.
+    lambda self: Source SetCounter.
       {
         get = lambda _: Unit. !(r.x),
         set = lambda i: Nat. r.x := i,
@@ -19,11 +19,11 @@ setCounterClass =
       };
 
 dummySetCounter =
- {
-   get = lambda _: Unit. 0,
-   set = lambda _: Nat. unit,
-   inc = lambda _: Unit. unit
- };
+  {
+    get = lambda _: Unit. 0,
+    set = lambda _: Nat. unit,
+    inc = lambda _: Unit. unit
+  };
 
 newSetCounter =
   lambda _: Unit.
@@ -33,16 +33,36 @@ newSetCounter =
 
 instrCounterClass =
   lambda r: InstrCounterRep.
-    lambda self: Ref InstrCounter.
+    lambda self: Source InstrCounter.
       let super = setCounterClass r self in
         {
           get = super.get,
-          set = super.set,
+          set = lambda i: Nat. (r.a := succ (!(r.a)); super.set i),
           inc = super.inc,
           accesses = lambda _: Unit. !(r.a)
         };
+
+dummyInstrCounter =
+  {
+    get = lambda _: Unit. 0,
+    set = lambda _: Nat. unit,
+    inc = lambda _: Unit. unit,
+    accesses = lambda _: Unit. 0
+  };
+
+newInstrCounterClass =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0} in
+    let cAux = ref dummyInstrCounter in
+    (cAux := instrCounterClass r cAux; !cAux);
 
 sc = newSetCounter unit;
 sc.inc unit;
 sc.inc unit;
 sc.get unit;
+
+ic = newInstrCounterClass unit;
+ic.inc unit;
+ic.inc unit;
+ic.get unit;
+ic.accesses unit;
