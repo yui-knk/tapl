@@ -84,14 +84,27 @@ newFunnyBackupCounter =
   lambda _: Unit. let r = {x = ref 1, b = ref 1} in
     funnyBackupCounterClass r;
 
-/* 18.7.1 */
-fb = newFunnyBackupCounter unit;
-/* b = 1 */
-fb.inc unit;
-/* b = 2 */
-fb.inc unit;
-/* b = 3 */
-fb.inc unit;
-fb.get unit;
-fb.reset unit;
-fb.get unit;
+SetCounter = {get: Unit -> Nat, set: Nat -> Unit, inc: Unit -> Unit};
+
+setCounterClass =
+  lambda r: CounterRep.
+    fix
+      (
+        lambda self: SetCounter.
+          {
+            get = lambda _: Unit. !(r.x),
+            set = lambda i: Nat. r.x := i,
+            inc = lambda _: Unit. self.set (succ (self.get unit))
+          }
+      );
+
+newSetCounter =
+  lambda _: Unit. let r = {x = ref 1} in
+    setCounterClass r;
+
+/* 18.9 */
+sc = newSetCounter unit;
+sc.inc unit;
+sc.inc unit;
+/* 3 */
+sc.get unit;
