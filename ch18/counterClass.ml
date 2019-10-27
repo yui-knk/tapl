@@ -116,9 +116,36 @@ newSetCounter2 =
     let r = {x = ref 1} in
       fix (setCounterClass2 r);
 
+InstrCounter = {
+  get: Unit -> Nat,
+  set: Nat -> Unit,
+  inc: Unit -> Unit,
+  accesses: Unit -> Nat
+};
+
+InstrCounterRep = { x: Ref Nat, a: Ref Nat };
+
+instrCounterClass =
+  lambda r: InstrCounterRep.
+    lambda self: InstrCounter.
+      let super = setCounterClass2 r self in
+        {
+          get = super.get,
+          set = lambda i: Nat. (r.a := succ (!(r.a)); super.set 1),
+          inc = super.inc,
+          accesses = lambda _: Unit. !(r.a)
+        };
+
+newInstrCounter =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0} in
+      fix (instrCounterClass r);
+
+
 /* 18.10 */
-sc2 = newSetCounter2 unit;
-sc2.inc unit;
-sc2.inc unit;
+ic = newInstrCounter unit;
+ic.inc unit;
+ic.inc unit;
 /* 3 */
-sc2.get unit;
+ic.get unit;
+ic.accesses unit;
