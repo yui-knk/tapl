@@ -134,6 +134,8 @@ InstrCounter2 = {
 InstrCounterRep = { x: Ref Nat, a: Ref Nat };
 /* a is "set" called count, b is "get" called count */
 InstrCounterRep2 = { x: Ref Nat, a: Ref Nat, b: Ref Nat };
+/* a is "set" called count, b is backup */
+InstrCounterRep3 = { x: Ref Nat, a: Ref Nat, b: Ref Nat };
 
 instrCounterClass =
   lambda r: InstrCounterRep.
@@ -173,7 +175,7 @@ instrCounterClassWithThunk =
         let super = setCounterClassWithThunk r self unit in
           {
             get = super.get,
-            set = lambda i: Nat. (r.a := succ (!(r.a)); super.set 1),
+            set = lambda i: Nat. (r.a := succ (!(r.a)); super.set i),
             inc = super.inc,
             accesses = lambda _: Unit. !(r.a)
           };
@@ -202,6 +204,64 @@ newInstrCounter2WithThunk =
       fix (instrCounterClass2WithThunk r) unit;
 
 
+InstrCounter2Reset = {
+  get: Unit -> Nat,
+  set: Nat -> Unit,
+  inc: Unit -> Unit,
+  reset: Unit -> Unit,
+  accesses_a: Unit -> Nat,
+  accesses_b: Unit -> Nat
+};
+
+instrCounterClass2WithThunkReset =
+  lambda r: InstrCounterRep2.
+    lambda self: Unit -> InstrCounter2Reset.
+      lambda _: Unit.
+        let super = instrCounterClass2WithThunk r self unit in
+          {
+            get = super.get,
+            set = super.set,
+            inc = super.inc,
+            reset = lambda _: Unit. r.x := 1,
+            accesses_a = super.accesses_a,
+            accesses_b = super.accesses_b
+          };
+
+newInstrCounterClass2WithThunkReset =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0, b = ref 0} in
+      fix (instrCounterClass2WithThunkReset r) unit;
+
+
+InstrCounterResetBackup = {
+  get: Unit -> Nat,
+  set: Nat -> Unit,
+  inc: Unit -> Unit,
+  reset: Unit -> Unit,
+  backup: Unit -> Unit,
+  accesses: Unit -> Nat
+};
+
+instrCounterClassWithThunkResetBackup =
+  lambda r: InstrCounterRep3.
+    lambda self: Unit -> InstrCounterResetBackup.
+      lambda _: Unit.
+        let super = instrCounterClassWithThunk r self unit in
+          {
+            get = super.get,
+            set = super.set,
+            inc = super.inc,
+            reset = lambda _: Unit. r.b := !(r.x),
+            backup = lambda _: Unit. r.x := !(r.b),
+            accesses = super.accesses
+          };
+
+newInstrCounterClassWithThunkResetBackup =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0, b = ref 1} in
+      fix (instrCounterClassWithThunkResetBackup r) unit;
+
+
 /* 18.11.1 (1) */
 ic2 = newInstrCounter2WithThunk unit;
 ic2.inc unit;
@@ -210,3 +270,25 @@ ic2.inc unit;
 ic2.get unit;
 ic2.accesses_a unit;
 ic2.accesses_b unit;
+
+/* 18.11.1 (2) */
+icr2 = newInstrCounterClass2WithThunkReset unit;
+icr2.inc unit;
+icr2.inc unit;
+/* 3 */
+icr2.get unit;
+icr2.reset unit;
+icr2.get unit;
+icr2.accesses_a unit;
+icr2.accesses_b unit;
+
+/* 18.11.1 (3) */
+icrb = newInstrCounterClassWithThunkResetBackup unit;
+icrb.inc unit;
+icrb.inc unit;
+/* 3 */
+icrb.get unit;
+icrb.backup unit;
+icrb.reset unit;
+icrb.get unit;
+icrb.accesses unit;
