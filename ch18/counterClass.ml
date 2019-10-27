@@ -1,4 +1,5 @@
 CounterRep = {x: Ref Nat};
+BackupCounterRep = {x: Ref Nat, b: Ref Nat };
 
 counterClass =
   lambda r: CounterRep.
@@ -38,14 +39,29 @@ newdecCounter =
   lambda _: Unit. let r = {x = ref 1} in
     decCounterClass r;
 
-dc = newdecCounter unit;
-dc.get unit;
-dc.inc unit;
-dc.get unit;
-dc.reset unit;
-dc.get unit;
-dc.inc unit;
-dc.inc unit;
-dc.get unit;
-dc.dec unit;
-dc.get unit;
+backupCounterClass =
+  lambda r: BackupCounterRep.
+    let super = resetCounterClass r in
+      {
+        get = super.get,
+        inc = super.inc,
+        reset = lambda _: Unit. r.x := !(r.b),
+        backup = lambda _: Unit. r.b := !(r.x)
+      };
+
+newbackupCounter =
+  lambda _: Unit. let r = {x = ref 1, b = ref 1} in
+    backupCounterClass r;
+
+bc = newbackupCounter unit;
+bc.get unit;
+bc.inc unit;
+bc.get unit;
+bc.reset unit;
+bc.get unit;
+bc.inc unit;
+bc.inc unit;
+bc.get unit;
+bc.backup unit;
+bc.reset unit;
+bc.get unit;
