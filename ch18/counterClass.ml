@@ -1,5 +1,6 @@
 CounterRep = {x: Ref Nat};
 BackupCounterRep = {x: Ref Nat, b: Ref Nat };
+BackupCounter2Rep = {x: Ref Nat, b: Ref Nat, b2: Ref Nat };
 
 counterClass =
   lambda r: CounterRep.
@@ -53,15 +54,31 @@ newbackupCounter =
   lambda _: Unit. let r = {x = ref 1, b = ref 1} in
     backupCounterClass r;
 
-bc = newbackupCounter unit;
-bc.get unit;
-bc.inc unit;
-bc.get unit;
-bc.reset unit;
-bc.get unit;
-bc.inc unit;
-bc.inc unit;
-bc.get unit;
-bc.backup unit;
-bc.reset unit;
-bc.get unit;
+backupCounter2Class =
+  lambda r: BackupCounter2Rep.
+    let super = backupCounterClass r in
+      {
+        get = super.get,
+        inc = super.inc,
+        reset = super.reset,
+        backup = super.backup,
+        reset2 = lambda _: Unit. r.x := !(r.b2),
+        backup2 = lambda _: Unit. r.b2 := !(r.x)
+      };
+
+newbackupCounter2 =
+  lambda _: Unit. let r = {x = ref 1, b = ref 1, b2 = ref 1} in
+    backupCounter2Class r;
+
+/* 18.7.1 */
+bc2 = newbackupCounter2 unit;
+bc2.inc unit;
+/* b = 2 */
+bc2.backup unit;
+bc2.inc unit;
+/* b2 = 3 */
+bc2.backup2 unit;
+bc2.reset unit;
+bc2.get unit;
+bc2.reset2 unit;
+bc2.get unit;
