@@ -24,9 +24,28 @@ newResetCounter =
   lambda _: Unit. let r = {x = ref 1} in
     resetCounterClass r;
 
-rc = newResetCounter unit;
-rc.get unit;
-rc.inc unit;
-rc.get unit;
-rc.reset unit;
-rc.get unit;
+decCounterClass =
+  lambda r: CounterRep.
+    let super = resetCounterClass r in
+      {
+        get = super.get,
+        inc = super.inc,
+        reset = super.reset,
+        dec = lambda _: Unit. r.x := pred(!(r.x))
+      };
+
+newdecCounter =
+  lambda _: Unit. let r = {x = ref 1} in
+    decCounterClass r;
+
+dc = newdecCounter unit;
+dc.get unit;
+dc.inc unit;
+dc.get unit;
+dc.reset unit;
+dc.get unit;
+dc.inc unit;
+dc.inc unit;
+dc.get unit;
+dc.dec unit;
+dc.get unit;
