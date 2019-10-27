@@ -141,9 +141,41 @@ newInstrCounter =
     let r = {x = ref 1, a = ref 0} in
       fix (instrCounterClass r);
 
+setCounterClassWithThunk =
+  lambda r: CounterRep.
+    lambda self: Unit -> SetCounter.
+      lambda _: Unit.
+        {
+          get = lambda _: Unit. !(r.x),
+          set = lambda i: Nat. r.x := i,
+          inc = lambda _: Unit. (self unit).set (succ ((self unit).get unit))
+        };
 
-/* 18.10 */
-ic = newInstrCounter unit;
+newSetCounterClassWithThunk =
+  lambda _: Unit.
+    let r = {x = ref 1} in
+      fix (setCounterClassWithThunk r) unit;
+
+instrCounterClassWithThunk =
+  lambda r: InstrCounterRep.
+    lambda self: Unit -> InstrCounter.
+      lambda _: Unit.
+        let super = setCounterClassWithThunk r self unit in
+          {
+            get = super.get,
+            set = lambda i: Nat. (r.a := succ (!(r.a)); super.set 1),
+            inc = super.inc,
+            accesses = lambda _: Unit. !(r.a)
+          };
+
+newInstrCounterWithThunk =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0} in
+      fix (instrCounterClassWithThunk r) unit;
+
+
+/* 18.11 */
+ic = newInstrCounterWithThunk unit;
 ic.inc unit;
 ic.inc unit;
 /* 3 */
