@@ -123,7 +123,17 @@ InstrCounter = {
   accesses: Unit -> Nat
 };
 
+InstrCounter2 = {
+  get: Unit -> Nat,
+  set: Nat -> Unit,
+  inc: Unit -> Unit,
+  accesses_a: Unit -> Nat,
+  accesses_b: Unit -> Nat
+};
+
 InstrCounterRep = { x: Ref Nat, a: Ref Nat };
+/* a is "set" called count, b is "get" called count */
+InstrCounterRep2 = { x: Ref Nat, a: Ref Nat, b: Ref Nat };
 
 instrCounterClass =
   lambda r: InstrCounterRep.
@@ -173,11 +183,30 @@ newInstrCounterWithThunk =
     let r = {x = ref 1, a = ref 0} in
       fix (instrCounterClassWithThunk r) unit;
 
+instrCounterClass2WithThunk =
+  lambda r: InstrCounterRep2.
+    lambda self: Unit -> InstrCounter2.
+      lambda _: Unit.
+        let super = setCounterClassWithThunk r self unit in
+          {
+            get = lambda _: Unit. (r.b := succ (!(r.b)); super.get unit),
+            set = lambda i: Nat. (r.a := succ (!(r.a)); super.set 1),
+            inc = super.inc,
+            accesses_a = lambda _: Unit. !(r.a),
+            accesses_b = lambda _: Unit. !(r.b)
+          };
 
-/* 18.11 */
-ic = newInstrCounterWithThunk unit;
-ic.inc unit;
-ic.inc unit;
+newInstrCounter2WithThunk =
+  lambda _: Unit.
+    let r = {x = ref 1, a = ref 0, b = ref 0} in
+      fix (instrCounterClass2WithThunk r) unit;
+
+
+/* 18.11.1 (1) */
+ic2 = newInstrCounter2WithThunk unit;
+ic2.inc unit;
+ic2.inc unit;
 /* 3 */
-ic.get unit;
-ic.accesses unit;
+ic2.get unit;
+ic2.accesses_a unit;
+ic2.accesses_b unit;
