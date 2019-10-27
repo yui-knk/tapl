@@ -1,3 +1,5 @@
+/* P. 109 */
+
 ff = lambda ie: Nat -> Bool.
   lambda x: Nat.
     if iszero x then true
